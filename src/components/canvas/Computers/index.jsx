@@ -1,14 +1,22 @@
-import React, { Suspense, useEffect, useState } from "react"
+import React, { Suspense, useEffect, useState, useRef } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei"
 
 import CanvasLoader from "../../Loader"
 
-const Computers = ({ isMobile }) => {
+const Computers = ({ isMobile, scrollY }) => {
   const computer = useGLTF("./old_computer/scene.gltf");
+  const modelRef = useRef();
+
+  useEffect(() => {
+    if (modelRef.current) {
+      const rotationSpeed = -0.002;
+      modelRef.current.rotation.y = scrollY * rotationSpeed;
+    }
+  }, [scrollY]);
 
   return (
-    <mesh>
+    <mesh ref={modelRef}>
       <hemisphereLight intensity={0.7} groundColor='black' />
       <spotLight
         position={[-20, 10, 10]}
@@ -21,8 +29,8 @@ const Computers = ({ isMobile }) => {
       <pointLight intensity={10} />
       <primitive
         object={computer.scene}
-        scale={isMobile ? 1.5 : 1.5}
-        position={isMobile ? [-4.8, -2.5, 0.5] : [0, -3, 0.5]}
+        scale={isMobile ? 1 : 1.3}
+        position={isMobile ? [0, -2, 0.5] : [0, -2, 0.5]}
         rotation={[0, 2.1, 0]}
       />
     </mesh>
@@ -31,6 +39,11 @@ const Computers = ({ isMobile }) => {
 
 const ComputersCanvas = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  const handleScroll = () => {
+    setScrollY(window.scrollY);
+  };
 
   useEffect(() => {
     // Add a listener for changes to the screen size
@@ -47,6 +60,8 @@ const ComputersCanvas = () => {
     // Add the callback function as a listener for changes to the media query
     mediaQuery.addEventListener("change", handleMediaQueryChange);
 
+    window.addEventListener("scroll", handleScroll);
+
     // Remove the listener when the component is unmounted
     return () => {
       mediaQuery.removeEventListener("change", handleMediaQueryChange);
@@ -62,12 +77,7 @@ const ComputersCanvas = () => {
       gl={{ preserveDrawingBuffer: true }}
     >
       <Suspense fallback={<CanvasLoader />}>
-        <OrbitControls
-          enableZoom={false}
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 2}
-        />
-        <Computers isMobile={isMobile} />
+        <Computers isMobile={isMobile} scrollY={scrollY} />
       </Suspense>
 
       <Preload all />
