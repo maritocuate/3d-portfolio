@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom"
 
 import Hero from './components/Hero'
+import About from "./components/About"
 
 function App() {
 
@@ -10,6 +11,7 @@ function App() {
         <div className='bg-hero-pattern bg-cover bg-no-repeat bg-center'>
           <Hero />
         </div>
+        <About />
       </div>
     </BrowserRouter>
   )
